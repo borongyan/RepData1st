@@ -1,4 +1,46 @@
 First Reproducible Research Project -- Brian Davies
 ===================================================
 
+Loading and Processing the Data
+-------------------------------
+
+```{r Download and Process Data, cache = TRUE}
+download.file( 'https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip', destfile = 'activity.zip', method = 'curl' )
+unzip( 'activity.zip' )
+activityFrameScratch <- read.csv( 'activity.csv', header = TRUE )
+activityFrame <- data.frame( activityFrameScratch$date, activityFrameScratch$interval, activityFrameScratch$steps )
+rm( activityFrameScratch )
+colnames( activityFrame ) <- c( 'date', 'interval', 'steps' )
+head( activityFrame )
+```
+
+Analysis of Steps Taken Per Day
+--------------------------------
+
+Get summary stats for steps per day ...
+
+```{r Aggregate daily steps}
+dailySteps <- aggregate( activityFrame$steps, list(activityFrame$date),
+                         function( x ){ sum( x, na.rm =TRUE ) } )
+head ( dailySteps )
+```
+
+... and plot them and summarize them ...
+
+```{r Analyze Daily Steps}
+hist( dailySteps$x, breaks = 16, col =' gray80', xlab = "Steps Per Day", main = "Daily steps frequency analysis" )
+summary( dailySteps$x )
+```
+
+The output from __summary()__ is good enough for EDA purposes.
+
+Average Daily Activity Pattern
+------------------------------
+
+Imputing Missing Values
+-----------------------
+
+Weekday/Weekend Activity Patterns
+---------------------------------
+
 
