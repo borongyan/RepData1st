@@ -5,10 +5,13 @@ Loading and Processing the Data
 -------------------------------
 
 ```{r Download and Process Data, cache = TRUE}
-download.file( 'https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip', destfile = 'activity.zip', method = 'curl' )
+download.file( 'https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip',
+               destfile = 'activity.zip', method = 'curl' )
 unzip( 'activity.zip' )
 activityFrameScratch <- read.csv( 'activity.csv', header = TRUE )
-activityFrame <- data.frame( activityFrameScratch$date, activityFrameScratch$interval, activityFrameScratch$steps )
+activityFrame <- data.frame( activityFrameScratch$date,
+                             activityFrameScratch$interval,
+                             activityFrameScratch$steps )
 rm( activityFrameScratch )
 colnames( activityFrame ) <- c( 'date', 'interval', 'steps' )
 head( activityFrame )
@@ -28,7 +31,9 @@ head ( dailySteps )
 ... and plot them and summarize them ...
 
 ```{r Analyze Daily Steps}
-hist( dailySteps$x, breaks = 16, col =' gray80', xlab = "Steps Per Day", main = "Daily steps frequency analysis" )
+hist( dailySteps$x, breaks = 16, col =' gray80',
+      xlab = "Steps Per Day",
+      main = "Daily steps frequency analysis" )
 summary( dailySteps$x )
 ```
 
@@ -36,6 +41,11 @@ The output from __summary()__ is good enough for EDA purposes.
 
 Average Daily Activity Pattern
 ------------------------------
+
+Should be easy enough to calculate daily average summary using same general
+strategy as daily sums ...
+
+
 
 Imputing Missing Values
 -----------------------
