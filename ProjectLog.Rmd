@@ -66,7 +66,8 @@ plot( intervalStepsAvg$x, type='l', xlab = 'Interval', ylab = 'Steps',
       main = 'Average steps by 5-minute interval' )
 which.max(intervalStepsAvg$x)
 ```
-That looks kinda credible i.e. almost no steps in the early morning.
+Step 104 is `r (104-1)*5/60` hours into the day. The graph looks  kinda credible
+i.e. almost no steps in the early morning.
 
 Imputing Missing Values
 -----------------------
@@ -120,8 +121,9 @@ activityFrameImputed$steps[indexMissingSteps] <- wantedSteps
 And now we analyze the results.
 
 ```{r Aggregate & Analyze Imputed daily steps}
-dailyStepsImputed <- aggregate( activityFrameImputed$steps, list(activityFrameImputed$date),
-                         function( x ){ sum( x, na.rm =TRUE ) } )
+dailyStepsImputed <- aggregate( activityFrameImputed$steps,
+                                list(activityFrameImputed$date),
+                                function( x ){ sum( x, na.rm =TRUE ) } )
 hist( dailyStepsImputed$x, breaks = 16, col =' gray80',
       xlab = "Steps Per Day",
       main = "Imputed daily steps frequency analysis" )
@@ -131,4 +133,49 @@ summary( dailyStepsImputed$x )
 Weekday/Weekend Activity Patterns
 ---------------------------------
 
+I built the following up after a lot of trial and error! Ternary
+logical __ifelse()__ is a BIG help here.
 
+```{r Add weekday/weekend marker}
+activityFrameImputed$dayType <-
+  as.factor(
+    ifelse( grepl( '^S.+day$',
+                   weekdays( as.Date( activityFrameImputed$date ) ) ),
+            'weekend', 'weekday' )
+    )
+```
+
+Now use a slightly different __aggregate()__
+
+I've also added an __hours__ column to give the (fractional) hour of day so I
+can use an __xyplot__ without the obvious gaps in the exemplar in
+the briefing notes
+
+```{r Get averages by interval for wekday and weekend, add hours column}
+intervalStepsAvgByType <- aggregate( activityFrameImputed$steps,
+                                     list(as.factor(activityFrame$interval),
+                                          activityFrameImputed$dayType),
+                                     'mean' )
+intervalsHours <- seq(0,23.999,5/60)
+intervalStepsAvgByType$hours <- c(intervalsHours,intervalsHours)
+colnames(intervalStepsAvgByType) <- c( 'interval', 'dayType', 'steps', 'hours' )
+head(intervalStepsAvgByType)
+tail(intervalStepsAvgByType)
+```
+
+OK, ready to do the graph!
+
+```{r Weekday/Weekend average interval steps plots}
+library( 'lattice' )
+xyplot(intervalStepsAvgByType$steps ~ intervalStepsAvgByType$hours
+        | intervalStepsAvgByType$dayType,
+        type='l', lwd=2, layout=c(1,2),
+        xlab = 'Hour of Day', ylab = 'Average steps per 5 minutes'
+        )
+```
+
+Some pretty obvious differences there, I'd say.
+
+* Gets up later at weekends
+* Lower morning peak at weekends (no walk to work?)
+* More late-night activity at weekends
