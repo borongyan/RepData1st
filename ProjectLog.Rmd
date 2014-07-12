@@ -4,6 +4,8 @@ First Reproducible Research Project -- Brian Davies
 Loading and Processing the Data
 -------------------------------
 
+I'm going to cache this as it's a bit time consuming.
+
 ```{r Download and Process Data, cache = TRUE}
 download.file( 'https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip',
                destfile = 'activity.zip', method = 'curl' )
@@ -20,7 +22,8 @@ head( activityFrame )
 Analysis of Steps Taken Per Day
 --------------------------------
 
-Get summary stats for steps per day ...
+Get summary stats for steps per day. That function is probably a bit
+more complicated than it needs to be, but never mind...
 
 ```{r Aggregate daily steps}
 dailySteps <- aggregate( activityFrame$steps, list(activityFrame$date),
@@ -45,10 +48,58 @@ Average Daily Activity Pattern
 Should be easy enough to calculate daily average summary using same general
 strategy as daily sums ...
 
+```{r Aggregate interval steps}
+intervalStepsAvg <- aggregate( activityFrame$steps,
+                            list(as.factor(activityFrame$interval)),
+                            'mean', na.rm =TRUE )
+length(intervalStepsAvg$Group.1)
+head ( intervalStepsAvg )
+```
 
+There are `r 60/5*24` five-minute periods in a day, and the result frame
+has `r length( intervalStepsAvg$Group.1 )` rows.
+
+Analysing the results ...
+
+```{r Analyze interval steps}
+plot( intervalStepsAvg$x, type='l', xlab = 'Interval', ylab = 'Steps',
+      main = 'Average steps by 5-minute interval' )
+which.max(intervalStepsAvg$x)
+```
+That looks kinda credible i.e. almost no steps in the early morning.
 
 Imputing Missing Values
 -----------------------
+
+Using the __is.na()__ function, there are `r sum(is.na(activityFrame$steps))`
+missing step counts.
+
+RIGHT, I just noticed that those nice little interval designators in the raw
+data do things like this:
+
+```{r funny times}
+head( activityFrame$interval, 15 )
+```
+
+See how they go from 55 to 100? That means they're basically __hhmm__ with
+the __hh__ omitted if possible. I can't be bothered to figure out
+the time libraries so I'm going to write a little function to turn them
+into minute counts to generate an index into the averages frame.
+
+```{r define and test Interval2Minutes}
+Interval2Minutes <- function( interval ){
+  interval <- as.integer( interval )
+  hours_part <- floor( interval / 100 )
+  minutes_part <- interval - 100 * hours_part
+  minutes <- hours_part * 60 + minutes_part
+minutes
+}
+Interval2Minutes( 245 )
+Interval2Minutes( c( 100, 250 ) )
+Interval2Minutes( c( '100', '250' ) )
+```
+
+
 
 Weekday/Weekend Activity Patterns
 ---------------------------------
