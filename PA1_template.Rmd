@@ -176,6 +176,6 @@ xyplot(intervalStepsAvgByType$steps ~ intervalStepsAvgByType$hours
 
 Some pretty obvious differences there, I'd say.
 
-* Gets up later at weekends
+* Gets up later at weekends (kind of a soft-start)
 * Lower morning peak at weekends (no walk to work?)
 * More late-night activity at weekends
