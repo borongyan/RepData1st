@@ -99,7 +99,34 @@ Interval2Minutes( c( 100, 250 ) )
 Interval2Minutes( c( '100', '250' ) )
 ```
 
+Just check that __intervalStepsAvg__ is in the right order. This should be zero:
 
+```{r Check interval averages in right order}
+which(as.numeric(as.character(intervalStepsAvg$Group.1))[2:288] <=
+as.numeric(as.character(intervalStepsAvg$Group.1))[1:287])
+```
+
+Right, we're ready to go!
+
+```{r Impute missing steps as average}
+indexMissingSteps <- which(is.na(activityFrame$steps))
+intervalMissingSteps <- activityFrame$interval[indexMissingSteps]
+indexWantedSteps <- Interval2Minutes(intervalMissingSteps) / 5 + 1
+wantedSteps <- as.integer(round(intervalStepsAvg$x[indexWantedSteps]))
+activityFrameImputed <- activityFrame
+activityFrameImputed$steps[indexMissingSteps] <- wantedSteps
+```
+
+And now we analyze the results.
+
+```{r Aggregate & Analyze Imputed daily steps}
+dailyStepsImputed <- aggregate( activityFrameImputed$steps, list(activityFrameImputed$date),
+                         function( x ){ sum( x, na.rm =TRUE ) } )
+hist( dailyStepsImputed$x, breaks = 16, col =' gray80',
+      xlab = "Steps Per Day",
+      main = "Imputed daily steps frequency analysis" )
+summary( dailyStepsImputed$x )
+```
 
 Weekday/Weekend Activity Patterns
 ---------------------------------
