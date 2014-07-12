@@ -165,7 +165,7 @@ tail(intervalStepsAvgByType)
 
 OK, ready to do the graph!
 
-```{r Weekday/Weekend average interval steps plots}
+```{r Weekday-Weekend average interval steps plots}
 library( 'lattice' )
 xyplot(intervalStepsAvgByType$steps ~ intervalStepsAvgByType$hours
         | intervalStepsAvgByType$dayType,
